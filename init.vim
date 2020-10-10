@@ -122,6 +122,10 @@ set shortmess+=c
 " always show signcolumns
 set signcolumn=yes
 
+set splitbelow
+set termsize=10x0
+
+
 " Use tab for trigger completion with characters ahead and navigate.
 " Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
 inoremap <silent><expr> <TAB>
