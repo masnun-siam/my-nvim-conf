@@ -1,1 +1,4 @@
 **/plugged
+!.gitignore
+plugged/vim-devicons
+plugged/vim-flutter
