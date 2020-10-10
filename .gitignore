@@ -1,16 +1,1 @@
-#Ignore everything
-
-*
-
-
-#except this files
-
-!gitignore
-!init.vim
-!coc-settings.json
-!*.snippets
-
-#even they are in subfolders
-
-!*/
-
+**/plugged
