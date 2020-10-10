@@ -1,0 +1,39 @@
+snippet bloccontext "BLoC Context" b
+context.bloc<${1:BlocName}>()${2}
+endsnippet
+
+snippet pts "Part Statement" b
+part '${TM_FILENAME_BASE}.g.dart';	
+endsnippet
+
+snippet ptf "Part 'Freezed' Statement" b
+part '${TM_FILENAME_BASE}.freezed.dart';	
+endsnippet
+
+snippet fdataclass "Freezed data class" b
+@freezed
+abstract class ${1:DataClass} with _$${1:DataClass} {
+	const factory ${1:DataClass}(${2}) = _${1:DataClass};
+}
+endsnippet
+
+snippet funion "Freezed union class" b
+@freezed
+abstract class ${1:UnionClass} with _$${1:UnionClass} {
+	const factory ${1:UnionClass}.${3}() = _${3};
+}
+endsnippet
+
+snippet funioncase "Freezed Union Case" b
+abstract class ${1:Union}.${2}(${3}) = _${2};
+endsnippet
+
+snippet fromjson "Freezed Json serializable" b
+factory ${1:Union}.fromJson(Map<String, dynamic> json) => _$${1:Union}FromJson(json);
+endsnippet
+
+snippet bloceventhandlr "Bloc event handler" b
+(e) async* {${1}}
+endsnippet
+
+
