@@ -9,5 +9,19 @@
     "typescript.tsx",
     "graphql",
     "dart"
-  ]
+  ],
+  "languageserver": {
+  "dart": {
+    "command": "dart",
+    "args": [
+      "/home/siam/snap/flutter/common/flutter/bin/cache/dart-sdk/bin/snapshots/analysis_server.dart.snapshot",
+      "--lsp",
+      "--client-id",
+      "vim",
+      "--client-version",
+      "coc.nvim"
+    ],
+    "filetypes": ["dart"],
+    "trace.server": "verbose"
+  }
 }
