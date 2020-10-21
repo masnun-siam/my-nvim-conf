@@ -1,6 +1,10 @@
 {
   "suggest.noselect": false,
   "coc.preferences.formatOnSaveFiletypes": [
+    "c",
+    "cpp",
+    "java",
+    "py",
     "javascript",
     "typescript",
     "typescriptreact",
@@ -11,17 +15,34 @@
     "dart"
   ],
   "languageserver": {
-  "dart": {
-    "command": "dart",
-    "args": [
-      "/home/siam/snap/flutter/common/flutter/bin/cache/dart-sdk/bin/snapshots/analysis_server.dart.snapshot",
-      "--lsp",
-      "--client-id",
-      "vim",
-      "--client-version",
-      "coc.nvim"
-    ],
-    "filetypes": ["dart"],
-    "trace.server": "verbose"
+    "dart": {
+      "command": "dart",
+      "args": [
+        "/home/siam/snap/flutter/common/flutter/bin/cache/dart-sdk/bin/snapshots/analysis_server.dart.snapshot",
+        "--lsp",
+        "--client-id",
+        "vim",
+        "--client-version",
+        "coc.nvim"
+      ],
+      "filetypes": ["dart"],
+      "trace.server": "verbose"
+    },
+    "ccls": {
+      "command": "ccls",
+      "filetypes": ["c", "cpp", "objc", "objcpp"],
+      "rootPatterns": [
+        ".ccls",
+        "compile_commands.json",
+        ".vim/",
+        ".git/",
+        ".hg/"
+      ],
+      "initializationOptions": {
+        "cache": {
+          "directory": "/tmp/ccls"
+        }
+      }
+    }
   }
 }

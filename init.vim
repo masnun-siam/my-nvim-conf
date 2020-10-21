@@ -84,7 +84,7 @@ noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
 noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
 xmap <leader>a  <Plug>(coc-codeaction-selected)
 nmap <leader>a  <Plug>(coc-codeaction-selected)
-set relativenumber
+set number relativenumber
 set softtabstop=4
 set shiftwidth=4
 set tabstop=4
@@ -133,7 +133,7 @@ let g:coc_global_extensions = [
 set hidden " Some servers have issues with backup files, see #649 set nobackup set nowritebackup " Better display for messages set cmdheight=2 " You will have bad experience for diagnostic messages when it's default 4000.
 set updatetime=300
 
-" don't give |ins-completion-menu| messages.
+" don't ive |ins-completion-menu| messages.
 set shortmess+=c
 
 " always show signcolumns
@@ -255,10 +255,14 @@ noremap <buffer> <leader>tr :DartToggleMethodBodyType<cr>
 let g:lsc_server_commands = {'dart': 'dart_language_server'}
 let g:lsc_auto_map = v:true
 
-let g:lsc_dart_sdk_path = '/home/siam/snap/flutter/common/flutter/bin/cache/dart-sdk'
+let g:lsc_dart_sdk_path = '/usr/lib/flutter/bin/cache/dart-sdk'
 
 nnoremap <leader>fa :FlutterRun<cr>
 nnoremap <leader>fq :FlutterQuit<cr>
 nnoremap <leader>fr :FlutterHotReload<cr>
 nnoremap <leader>fR :FlutterHotRestart<cr>
-nnoremap <leader>fD :FlutterVisualDebug<cr>
+nnoremap <leader>fD :FlutterVisualDebug<cr>g
+imap jj <Esc>
+inoremap <expr> j ((pumvisible())?("\<C-n>"):("j"))
+inoremap <expr> k ((pumvisible())?("\<C-p>"):("k"))
+set scrolloff=10
