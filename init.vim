@@ -30,6 +30,10 @@ Plug 'honza/vim-snippets'
 Plug 'natebosch/dartlang-snippets'
 " Trigger configuration. You need to change this to something else than <tab> if you use https://github.com/Valloric/YouCompleteMe.
 " Initialize plugin system
+
+Plug 'frazrepo/vim-rainbow'
+Plug 'itchyny/lightline.vim'
+
 call plug#end()
 
 set runtimepath+=~/.config/nvim/my-snippets/UltiSnips
@@ -262,7 +266,20 @@ nnoremap <leader>fq :FlutterQuit<cr>
 nnoremap <leader>fr :FlutterHotReload<cr>
 nnoremap <leader>fR :FlutterHotRestart<cr>
 nnoremap <leader>fD :FlutterVisualDebug<cr>g
-imap jj <Esc>
+"imap jj <Esc>
 inoremap <expr> j ((pumvisible())?("\<C-n>"):("j"))
 inoremap <expr> k ((pumvisible())?("\<C-p>"):("k"))
 set scrolloff=10
+" Press <leader> Enter to remove search highlights
+
+noremap <silent> <leader><cr> :noh<cr>
+
+set completeopt=longest,menuone
+
+set laststatus=2
+
+if !has('gui_running')
+  set t_Co=256
+endif
+
+let g:lsc#completions_enabled = 0
