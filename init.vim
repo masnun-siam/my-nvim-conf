@@ -1,285 +1,237 @@
-" Specify a directory for plugins
-call plug#begin('~/.vim/plugged')
-Plug 'dart-lang/dart-vim-plugin'
-Plug 'natebosch/vim-lsc'
-Plug 'natebosch/vim-lsc-dart'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'scrooloose/nerdtree'
-"Plug 'tsony-tsonev/nerdtree-git-plugin'
-Plug 'Xuyuanp/nerdtree-git-plugin'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-Plug 'ryanoasis/vim-devicons'
-Plug 'airblade/vim-gitgutter'
-Plug 'ctrlpvim/ctrlp.vim' " fuzzy find files
-Plug 'scrooloose/nerdcommenter'
-"Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
-Plug 'thosakwe/vim-flutter'
-Plug 'christoomey/vim-tmux-navigator'
+if exists('g:vscode')
+   " VSCode extension
+    function! s:split(...) abort
+        let direction = a:1
+        let file = a:2
+        call VSCodeCall(direction == 'h' ? 'workbench.action.splitEditorDown' : 'workbench.action.splitEditorRight')
+        if file != ''
+            call VSCodeExtensionNotify('open-file', expand(file), 'all')
+        endif
+    endfunction
 
-Plug 'morhetz/gruvbox'
+    function! s:splitNew(...)
+        let file = a:2
+        call s:split(a:1, file == '' ? '__vscode_new__' : file)
+    endfunction
 
-Plug 'HerringtonDarkholme/yats.vim' " TS Syntax
-Plug 'jiangmiao/auto-pairs'
+    function! s:closeOtherEditors()
+        call VSCodeNotify('workbench.action.closeEditorsInOtherGroups')
+        call VSCodeNotify('workbench.action.closeOtherEditors')
+    endfunction
 
-" Track the engine.
-Plug 'SirVer/ultisnips'
+    function! s:manageEditorSize(...)
+        let count = a:1
+        let to = a:2
+        for i in range(1, count ? count : 1)
+            call VSCodeNotify(to == 'increase' ? 'workbench.action.increaseViewSize' : 'workbench.action.decreaseViewSize')
+        endfor
+    endfunction
 
-" Snippets are separated from the engine. Add this if you want them:
-Plug 'honza/vim-snippets'
+    function! s:vscodeCommentary(...) abort
+        if !a:0
+            let &operatorfunc = matchstr(expand('<sfile>'), '[^. ]*$')
+            return 'g@'
+        elseif a:0 > 1
+            let [line1, line2] = [a:1, a:2]
+        else
+            let [line1, line2] = [line("'["), line("']")]
+        endif
 
-Plug 'natebosch/dartlang-snippets'
-" Trigger configuration. You need to change this to something else than <tab> if you use https://github.com/Valloric/YouCompleteMe.
-" Initialize plugin system
+        call VSCodeCallRange("editor.action.commentLine", line1, line2, 0)
+    endfunction
 
-Plug 'frazrepo/vim-rainbow'
-Plug 'itchyny/lightline.vim'
+    function! s:openVSCodeCommandsInVisualMode()
+        normal! gv
+        let visualmode = visualmode()
+        if visualmode == "V"
+            let startLine = line("v")
+            let endLine = line(".")
+            call VSCodeNotifyRange("workbench.action.showCommands", startLine, endLine, 1)
+        else
+            let startPos = getpos("v")
+            let endPos = getpos(".")
+            call VSCodeNotifyRangePos("workbench.action.showCommands", startPos[1], endPos[1], startPos[2], endPos[2], 1)
+        endif
+    endfunction
 
-call plug#end()
-
-set runtimepath+=~/.config/nvim/my-snippets/UltiSnips
-
-let g:UltiSnipsExpandTrigger="<c-s>"
-let g:UltiSnipsJumpForwardTrigger="<c-j>"
-let g:UltiSnipsJumpBackwardTrigger="<c-k>"
-
-" If you want :UltiSnipsEdit to split your window.
-let g:UltiSnipsEditSplit="vertical"
-
-nmap <C-n> :NERDTreeToggle<CR>
-vmap ++ <plug>NERDCommenterToggle
-nmap ++ <plug>NERDCommenterToggle
-
-" open NERDTree automatically
-autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
-
-let g:NERDTreeGitStatusWithFlags = 1
-"let g:WebDevIconsUnicodeDecorateFolderNodes = 1
-"let g:NERDTreeGitStatusNodeColorization = 1
-"let g:NERDTreeColorMapCustom = {
-    "\ "Staged"    : "#0ee375",  
-    "\ "Modified"  : "#d9bf91",  
-    "\ "Renamed"   : "#51C9FC",  
-    "\ "Untracked" : "#FCE77C",  
-    "\ "Unmerged"  : "#FC51E6",  
-    "\ "Dirty"     : "#FFBD61",  
-    "\ "Clean"     : "#87939A",   
-    "\ "Ignored"   : "#808080"   
-    "\ }                         
-
-
-let g:NERDTreeIgnore = ['^node_modules$']
-
-" vim-prettier
-"let g:prettier#quickfix_enabled = 0
-"let g:prettier#quickfix_auto_focus = 0
-" prettier command for coc
-command! -nargs=0 Prettier :CocCommand prettier.formatFile
-" run prettier on save
-"let g:prettier#autoformat = 0
-"autocmd BufWritePre *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html PrettierAsync
+    function! s:openWhichKeyInVisualMode()
+        normal! gv
+        let visualmode = visualmode()
+        if visualmode == "V"
+            let startLine = line("v")
+            let endLine = line(".")
+            call VSCodeNotifyRange("whichkey.show", startLine, endLine, 1)
+        else
+            let startPos = getpos("v")
+            let endPos = getpos(".")
+            call VSCodeNotifyRangePos("whichkey.show", startPos[1], endPos[1], startPos[2], endPos[2], 1)
+        endif
+    endfunction
 
 
-" ctrlp
-let g:ctrlp_user_command = ['.git/', 'git --git-dir=%s/.git ls-files -oc --exclude-standard']
+    command! -complete=file -nargs=? Split call <SID>split('h', <q-args>)
+    command! -complete=file -nargs=? Vsplit call <SID>split('v', <q-args>)
+    command! -complete=file -nargs=? New call <SID>split('h', '__vscode_new__')
+    command! -complete=file -nargs=? Vnew call <SID>split('v', '__vscode_new__')
+    command! -bang Only if <q-bang> == '!' | call <SID>closeOtherEditors() | else | call VSCodeNotify('workbench.action.joinAllGroups') | endif
 
-" j/k will move virtual lines (lines that wrap)
-noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
-noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a  <Plug>(coc-codeaction-selected)
-set number relativenumber
-set softtabstop=4
-set shiftwidth=4
-set tabstop=4
-set expandtab
-set autoindent
-set cindent
-filetype indent off
-set smarttab
-set cindent
-set tabstop=2
-set shiftwidth=2
-" always uses spaces instead of tab characters
-set expandtab
+    " Better Navigation
+    nnoremap <silent> <C-j> :call VSCodeNotify('workbench.action.navigateDown')<CR>
+    xnoremap <silent> <C-j> :call VSCodeNotify('workbench.action.navigateDown')<CR>
+    nnoremap <silent> <C-k> :call VSCodeNotify('workbench.action.navigateUp')<CR>
+    xnoremap <silent> <C-k> :call VSCodeNotify('workbench.action.navigateUp')<CR>
+    nnoremap <silent> <C-h> :call VSCodeNotify('workbench.action.navigateLeft')<CR>
+    xnoremap <silent> <C-h> :call VSCodeNotify('workbench.action.navigateLeft')<CR>
+    nnoremap <silent> <C-l> :call VSCodeNotify('workbench.action.navigateRight')<CR>
+    xnoremap <silent> <C-l> :call VSCodeNotify('workbench.action.navigateRight')<CR>
 
-colorscheme gruvbox
+    nnoremap gr <Cmd>call VSCodeNotify('editor.action.goToReferences')<CR>
 
-" sync open file with NERDTree
-" " Check if NERDTree is open or active
-function! IsNERDTreeOpen()        
-  return exists("t:NERDTreeBufName") && (bufwinnr(t:NERDTreeBufName) != -1)
-endfunction
+    " Bind C-/ to vscode commentary since calling from vscode produces double comments due to multiple cursors
+    xnoremap <expr> <C-/> <SID>vscodeCommentary()
+    nnoremap <expr> <C-/> <SID>vscodeCommentary() . '_'
 
-" Call NERDTreeFind iff NERDTree is active, current window contains a modifiable
-" file, and we're not in vimdiff
-function! SyncTree()
-  if &modifiable && IsNERDTreeOpen() && strlen(expand('%')) > 0 && !&diff
-    NERDTreeFind
-    wincmd p
-  endif
-endfunction
+    nnoremap <silent> <C-w>_ :<C-u>call VSCodeNotify('workbench.action.toggleEditorWidths')<CR>
 
-" Highlight currently open buffer in NERDTree
-autocmd BufEnter * call SyncTree()
+    nnoremap <silent> <Space> :call VSCodeNotify('whichkey.show')<CR>
+    xnoremap <silent> <Space> :<C-u>call <SID>openWhichKeyInVisualMode()<CR>
 
-" coc config
-let g:coc_global_extensions = [
-  \ 'coc-snippets',
-  \ 'coc-pairs',
-  \ 'coc-tsserver',
-  \ 'coc-eslint', 
-  \ 'coc-prettier', 
-  \ 'coc-json', 
-  \ ]
-" from readme
-" if hidden is not set, TextEdit might fail.
-set hidden " Some servers have issues with backup files, see #649 set nobackup set nowritebackup " Better display for messages set cmdheight=2 " You will have bad experience for diagnostic messages when it's default 4000.
-set updatetime=300
+    xnoremap <silent> <C-P> :<C-u>call <SID>openVSCodeCommandsInVisualMode()<CR>
 
-" don't ive |ins-completion-menu| messages.
-set shortmess+=c
+    xmap gc  <Plug>VSCodeCommentary
+    nmap gc  <Plug>VSCodeCommentary
+    omap gc  <Plug>VSCodeCommentary
+    nmap gcc <Plug>VSCodeCommentaryLine
+else
+    call plug#begin('~/AppData/Local/nvim/plugged')
 
-" always show signcolumns
-set signcolumn=yes
+    " File and folder management
+    Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+    Plug 'junegunn/fzf.vim'
+    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+    Plug 'preservim/nerdtree'
+    Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 
-set splitbelow
+    " Snippets
+    Plug 'SirVer/ultisnips'
+    Plug 'honza/vim-snippets'
+    Plug 'natebosch/dartlang-snippets'
+    
+    " Vim sarround
+    Plug 'tpope/vim-surround'
 
+    " Language support
+    Plug 'tpope/vim-projectionist'
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    Plug 'jiangmiao/auto-pairs'
+    
+    " Dart
+    Plug 'dart-lang/dart-vim-plugin'
 
-" Use tab for trigger completion with characters ahead and navigate.
-" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+    " Git
+    Plug 'tpope/vim-fugitive'
+    Plug 'vim-airline/vim-airline'
 
-function! s:check_back_space() abort
-  let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
+    " Theme
+    Plug 'morhetz/gruvbox'
+    call plug#end()
 
-" Use <c-space> to trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
+    colorscheme gruvbox
 
-" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current position.
-" Coc only does snippet and additional edit on confirm.
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-" Or use `complete_info` if your vim support it, like:
-" inoremap <expr> <cr> complete_nfo()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+    set noerrorbells                                              " Don't add sounds for errors
+    set number
+    set nowrap
+    set nohlsearch
+    set smartcase
+    set noswapfile
+    set nobackup
+    set undodir=~/AppData/Local/nvim-data/backup
+    set undofile
+    set incsearch
+    set tabstop=2
+    set softtabstop=0 noexpandtab
+    set shiftwidth=2
+    " set colorcolumn=120
+    set clipboard=unnamedplus
+    set backspace=indent,eol,start
+    " highlight ColorColumn ctermbg=0 guibg=lightgrey
 
-" Use `[g` and `]g` to navigate diagnostics
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
+    let mapleader=" "
+    nnoremap <leader>fe :CocCommand flutter.emulators <CR>
+    nnoremap <leader>fd :below new output:///flutter-dev <CR>
+    map <leader>h :wincmd h <CR>
+    map <leader>j :wincmd j <CR>
+    map <leader>k :wincmd k <CR>
+    map <leader>l :wincmd l <CR>
+    
+    noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
+    noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
+    
+    inoremap <expr> j ((pumvisible())?("\<C-n>"):("j"))
+    inoremap <expr> k ((pumvisible())?("\<C-p>"):("k"))
+    
+    " imap <expr> <C-j> pumvisible() ? "\<C-n>" : "\<C-j>"
+    " imap <expr> <C-k> pumvisible() ? "\<C-p>" : "\<C-k>"
 
-" Remap keys for gotos
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
+    nnoremap <C-b> :NERDTreeToggle<CR>
 
-" Use K to show documentation in preview window
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+    let g:dart_format_on_save = 1
+    let g:dartfmt_options = ['--fix', '--line-length 120']
 
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
+    " Coc
+    nmap <silent> gd <Plug>(coc-definition)
+    nmap <silent> gy <Plug>(coc-type-definition)
+    nmap <silent> gi <Plug>(coc-implementation)
+    nmap <silent> gr <Plug>(coc-references)
 
-" Highlight symbol under cursor on CursorHold
-autocmd CursorHold * silent call CocActionAsync('highlight')
+    " Symbol renaming.
+    nmap <leader>rn <Plug>(coc-rename)
 
-" Remap for rename current word
-nmap <F2> <Plug>(coc-rename)
+    " Use K to show documentation in preview window
+    nnoremap <silent> K :call <SID>show_documentation()<CR>
+    function! s:show_documentation()
+      if (index(['vim','help'], &filetype) >= 0)
+        execute 'h '.expand('<cword>')
+      elseif (coc#rpc#ready())
+        call CocActionAsync('doHover')
+      else
+        execute '!' . &keywordprg . " " . expand('<cword>')
+      endif
+    endfunction
 
-" Remap for format selected region
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
+    nmap <C-P> :FZF<CR>
 
-augroup mygroup
-  autocmd!
-  " Setup formatexpr specified filetype(s).
-  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
-  " Update signature help on jump placeholder
-  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-augroup end
+    nmap <leader>gs :G<CR>
+    nmap <leader>gh :diffget //2<CR>
+    nmap <leader>gl :diffget //3<CR>
 
-" Remap for do codeAction of selected region, ex: `<leader>aap` for current paragraph
-xmap <leader>a  <Plug>(coc-codeaction-selected)
-nmap <leader>a  <Plug>(coc-codeaction-selected)
+    imap <tab> <Plug>(coc-snippets-expand)
+    let g:UltiSnipsExpandTrigger = '<Nop>'
+    " let g:coc_snippet_next = '<TAB>'
+    " let g:coc_snippet_prev = '<S-TAB>'
 
-" Remap for do codeAction of current line
-nmap <leader>ac  <Plug>(coc-codeaction)
-" Fix autofix problem of current line
-nmap <leader>qf  <Plug>(coc-fix-current)
+    " Use <c-space> to trigger completion.
+    if has('nvim')
+      inoremap <silent><expr> <c-space> coc#refresh()
+    else
+      inoremap <silent><expr> <c-@> coc#refresh()
+    endif
 
-" Create mappings for function text object, requires document symbols feature of languageserver.
-xmap if <Plug>(coc-funcobj-i)
-xmap af <Plug>(coc-funcobj-a)
-omap if <Plug>(coc-funcobj-i)
-omap af <Plug>(coc-funcobj-a)
+    " Applying codeAction to the selected region.
+    " Example: `<leader>aap` for current paragraph
+    xmap <leader>a <Plug>(coc-codeaction-selected)
+    nmap <leader>a <Plug>(coc-codeaction-selected)
+    
+    " enable vim auto save
+    " let g:auto_save = 1
 
-" Use <C-d> for select selections ranges, needs server support, like: coc-tsserver, coc-python
+    "coc config
+    let g:coc_global_extensions = [
+      \ 'coc-flutter',
+      \ 'coc-snippets',
+      \ 'coc-yaml',
+      \ ]
 
-" Use `:Format` to format current buffer
-command! -nargs=0 Format :call CocAction('format')
-
-" Use `:Fold` to fold current buffer
-command! -nargs=? Fold :call     CocAction('fold', <f-args>)
-
-" use `:OR` for organize import of current buffer
-command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
-
-" Add status line support, for integration with other plugin, checkout `:h coc-status`
-set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
-
-" Using CocList
-" Show all diagnostics
-nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
-" Manage extensions
-nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
-" Show commands
-nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
-" Find symbol of current document
-nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
-" Search workspace symbols
-nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
-" Do default action for next item.
-nnoremap <silent> <space>j  :<C-u>CocNext<CR>
-" Do default action for previous item.
-nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
-" Resume latest coc list
-nnoremap <silent> <space>p  :<C-u>CocListResume<CR>i
-
-noremap <buffer> <leader>tr :DartToggleMethodBodyType<cr>
-
-let g:lsc_server_commands = {'dart': 'dart_language_server'}
-let g:lsc_auto_map = v:true
-
-let g:lsc_dart_sdk_path = '/usr/lib/flutter/bin/cache/dart-sdk'
-
-nnoremap <leader>fa :FlutterRun<cr>
-nnoremap <leader>fq :FlutterQuit<cr>
-nnoremap <leader>fr :FlutterHotReload<cr>
-nnoremap <leader>fR :FlutterHotRestart<cr>
-nnoremap <leader>fD :FlutterVisualDebug<cr>g
-"imap jj <Esc>
-inoremap <expr> j ((pumvisible())?("\<C-n>"):("j"))
-inoremap <expr> k ((pumvisible())?("\<C-p>"):("k"))
-set scrolloff=10
-" Press <leader> Enter to remove search highlights
-
-noremap <silent> <leader><cr> :noh<cr>
-
-set completeopt=longest,menuone
-
-set laststatus=2
-
-if !has('gui_running')
-  set t_Co=256
+    let g:NERDTreeGitStatusWithFlags = 1
 endif
 
-let g:lsc#completions_enabled = 0
